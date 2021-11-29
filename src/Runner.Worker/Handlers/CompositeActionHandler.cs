@@ -453,6 +453,31 @@ namespace GitHub.Runner.Worker.Handlers
             {
                 step.ExecutionContext.Result = Common.Util.TaskResultUtil.MergeTaskResults(step.ExecutionContext.Result, step.ExecutionContext.CommandResult.Value);
             }
+                        // Fixup the step result if ContinueOnError
+            if (step.ExecutionContext.Result == TaskResult.Failed)
+            {
+                var continueOnError = false;
+                try
+                {
+                    var templateEvaluator = step.ExecutionContext.ToPipelineTemplateEvaluator();
+                    continueOnError = templateEvaluator.EvaluateStepContinueOnError(step.ContinueOnError, step.ExecutionContext.ExpressionValues, step.ExecutionContext.ExpressionFunctions);
+                }
+                catch (Exception ex)
+                {
+                    Trace.Info("The step failed and an error occurred when attempting to determine whether to continue on error.");
+                    Trace.Error(ex);
+                    step.ExecutionContext.Error("The step failed and an error occurred when attempting to determine whether to continue on error.");
+                    step.ExecutionContext.Error(ex);
+                }
+
+                if (continueOnError)
+                {
+                    step.ExecutionContext.Outcome = step.ExecutionContext.Result;
+                    step.ExecutionContext.Result = TaskResult.Succeeded;
+                    Trace.Info($"Updated step result (continue on error)");
+                }
+            }
+            Trace.Info($"Step result: {step.ExecutionContext.Result}");
 
             Trace.Info($"Step result: {step.ExecutionContext.Result}");
             step.ExecutionContext.Debug($"Finished: {step.DisplayName}");

@@ -124,6 +124,9 @@
                     "name": "string-steps-context",
                     "id": "non-empty-string",
                     "if": "step-if",
+                    "continue-on-error": {
+                        "type": "boolean-steps-context"
+                    },
                     "run": {
                         "type": "string-steps-context",
                         "required": true
@@ -201,6 +204,21 @@
             ],
             "string": {}
         },
+        "boolean-steps-context": {
+            "context": [
+                "github",
+                "needs",
+                "strategy",
+                "matrix",
+                "secrets",
+                "steps",
+                "job",
+                "runner",
+                "env",
+                "hashFiles(1,255)"
+            ],
+            "boolean": {}
+        },
         "step-env": {
             "context": [
                 "github",
@@ -220,19 +238,19 @@
         },
         "step-if": {
             "context": [
-              "github",
-              "inputs",
-              "strategy",
-              "matrix",
-              "steps",
-              "job",
-              "runner",
-              "env",
-              "always(0,0)",
-              "failure(0,0)",
-              "cancelled(0,0)",
-              "success(0,0)",
-              "hashFiles(1,255)"
+                "github",
+                "inputs",
+                "strategy",
+                "matrix",
+                "steps",
+                "job",
+                "runner",
+                "env",
+                "always(0,0)",
+                "failure(0,0)",
+                "cancelled(0,0)",
+                "success(0,0)",
+                "hashFiles(1,255)"
             ],
             "string": {}
         },
