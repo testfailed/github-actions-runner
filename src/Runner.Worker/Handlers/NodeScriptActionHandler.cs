@@ -1,12 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using GitHub.DistributedTask.WebApi;
 using GitHub.Runner.Common;
 using GitHub.Runner.Sdk;
-using GitHub.DistributedTask.WebApi;
 using Pipelines = GitHub.DistributedTask.Pipelines;
-using System;
-using System.Linq;
 
 namespace GitHub.Runner.Worker.Handlers
 {
@@ -99,6 +99,14 @@ namespace GitHub.Runner.Worker.Handlers
                 workingDirectory = HostContext.GetDirectory(WellKnownDirectory.Work);
             }
 
+#if OS_OSX
+            if (string.Equals(Data.NodeVersion, "node12", StringComparison.OrdinalIgnoreCase) &&
+                Constants.Runner.PlatformArchitecture.Equals(Constants.Architecture.Arm64))
+            {
+                ExecutionContext.Output($"The node12 is not supported on macOS ARM64 platform. Use node16 instead.");
+                Data.NodeVersion = "node16";
+            }
+#endif
             var nodeRuntimeVersion = await StepHost.DetermineNodeRuntimeVersion(ExecutionContext, Data.NodeVersion);
             string file = Path.Combine(HostContext.GetDirectory(WellKnownDirectory.Externals), nodeRuntimeVersion, "bin", $"node{IOUtil.ExeExtension}");
 
