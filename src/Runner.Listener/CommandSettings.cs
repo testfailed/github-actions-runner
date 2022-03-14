@@ -42,6 +42,7 @@ namespace GitHub.Runner.Listener
         private readonly string[] validArgs =
         {
             Constants.Runner.CommandLine.Args.Auth,
+            Constants.Runner.CommandLine.Args.JitConfig,
             Constants.Runner.CommandLine.Args.Labels,
             Constants.Runner.CommandLine.Args.MonitorSocketAddress,
             Constants.Runner.CommandLine.Args.Name,
@@ -166,6 +167,12 @@ namespace GitHub.Runner.Listener
                 description: "How would you like to authenticate?",
                 defaultValue: defaultValue,
                 validator: Validators.AuthSchemeValidator);
+        }
+
+        public string GetJitConfig()
+        {
+            return GetArg(
+                name: Constants.Runner.CommandLine.Args.JitConfig);
         }
 
         public string GetRunnerName()

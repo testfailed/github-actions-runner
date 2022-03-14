@@ -1,18 +1,19 @@
-using GitHub.DistributedTask.WebApi;
-using GitHub.Runner.Listener.Configuration;
 using System;
-using System.Threading;
-using System.Threading.Tasks;
-using GitHub.Services.WebApi;
-using Pipelines = GitHub.DistributedTask.Pipelines;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using GitHub.DistributedTask.WebApi;
 using GitHub.Runner.Common;
-using GitHub.Runner.Sdk;
-using System.Linq;
 using GitHub.Runner.Listener.Check;
-using System.Collections.Generic;
+using GitHub.Runner.Listener.Configuration;
+using GitHub.Runner.Sdk;
+using GitHub.Services.WebApi;
+using Pipelines = GitHub.DistributedTask.Pipelines;
 
 namespace GitHub.Runner.Listener
 {
@@ -190,6 +191,19 @@ namespace GitHub.Runner.Listener
                     }
 
                     return Constants.Runner.ReturnCode.Success;
+                }
+
+                var base64JitConfig = command.GetJitConfig();
+                if (!string.IsNullOrEmpty(base64JitConfig))
+                {
+                    var decodedJitConfig = Encoding.UTF8.GetString(Convert.FromBase64String(base64JitConfig));
+                    var jitConfig = StringUtil.ConvertFromJson<Dictionary<string, string>>(decodedJitConfig);
+                    foreach (var config in jitConfig)
+                    {
+                        var configFile = Path.Combine(HostContext.GetDirectory(WellKnownDirectory.Root), config.Key);
+                        var configContent = Encoding.UTF8.GetString(Convert.FromBase64String(config.Value));
+                        File.WriteAllText(configFile, configContent, Encoding.UTF8);
+                    }
                 }
 
                 RunnerSettings settings = configManager.LoadSettings();
